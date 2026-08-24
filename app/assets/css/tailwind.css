@@ -1,0 +1,8 @@
+@import "tailwindcss";
+
+/* Evitar conflictos entre Vuetify y Tailwind */
+@layer base {
+  html {
+    font-family: system-ui, sans-serif;
+  }
+}

@@ -1,0 +1,205 @@
+/* 1. Definir capas primero */
+@layer theme, base, components, utilities;
+
+/* 2. Importar Tailwind v4 */
+@import "tailwindcss";
+
+/* 3. Importar Vuetify en su propia capa para evitar conflictos */
+@layer components {
+  @import "vuetify/styles";
+}
+
+/* 4. Importar iconos MDI */
+@import "@mdi/font/css/materialdesignicons.css";
+
+/* 4b. Estilos de v-calendar (usado por el date-picker de rango) */
+@import "v-calendar/style.css";
+
+/* 5. Tus estilos personalizados */
+@import "./variables.css";
+
+#__nuxt {
+  font-family:
+    Nunito,
+    webfontregular,
+    -apple-system,
+    Segoe UI,
+    Roboto,
+    Helvetica,
+    Arial,
+    sans-serif,
+    Apple Color Emoji,
+    Segoe UI Emoji,
+    system-ui;
+  background-color: var(--bg-main);
+  color: var(--text-primary);
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* Paleta de marca (tema claro) compartida por las páginas públicas: feeds, perfiles y landing.
+   Reutiliza los tokens globales de variables.css para igualar la parte privada.
+   - .public-page: páginas standalone (home landing, auth) → tokens + pantalla completa.
+   - .public-surface: páginas que ya viven dentro del layout default → solo los tokens
+     (el fondo y la altura los aporta el <main> del layout). */
+.public-page,
+.public-surface {
+  --pp-bg: var(--mc-bw-gray-subtle); /* fondo gris sutil sobre el que "flotan" las tarjetas */
+  --pp-surface: #ffffff; /* tarjetas / paneles */
+  --pp-brand: var(--primary); /* verde de marca */
+  --pp-brand-strong: var(--accent); /* verde oscuro para títulos/acentos/hover */
+  --pp-brand-tint: rgba(99, 133, 90, 0.12); /* fondo suave de placeholders/badges */
+  --pp-text: var(--mc-bw-text-primary); /* texto principal (casi negro) */
+  --pp-muted: var(--text-secondary); /* texto secundario */
+  --pp-border: rgba(30, 35, 38, 0.1); /* borde sutil de tarjetas */
+  --pp-shadow: 0 6px 20px -10px rgba(30, 35, 38, 0.25); /* elevación de tarjetas */
+
+  color: var(--pp-text);
+}
+
+.public-page {
+  min-height: 100vh;
+  min-height: 100dvh;
+  background: var(--pp-bg);
+}
+
+/* Pantallas de autenticación (login, registro, recuperar/reset de contraseña).
+   Reutilizan la capa de tokens de marca de .public-page: se aplican juntas
+   (class="public-page auth-page") para heredar --pp-* y el fondo gris sutil. */
+.auth-page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1.25rem;
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 25rem;
+  background: var(--pp-surface);
+  border: 1px solid var(--pp-border);
+  border-radius: 1rem;
+  box-shadow: var(--pp-shadow);
+  padding: 2.25rem 1.75rem 1.75rem;
+  animation: auth-rise 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* Firma: el logo monoespaciado de marca centrado sobre la tarjeta. */
+.auth-brand {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1.25rem;
+}
+
+.auth-title {
+  text-align: center;
+  font-size: 1.6rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  color: var(--pp-brand-strong);
+}
+.auth-subtitle {
+  text-align: center;
+  margin-top: 0.45rem;
+  margin-bottom: 1.5rem;
+  color: var(--pp-muted);
+  font-size: 0.98rem;
+}
+
+/* Enlace "¿olvidaste tu contraseña?" alineado a la derecha sobre el botón. */
+.auth-forgot {
+  display: block;
+  text-align: right;
+  margin: -0.25rem 0 1rem;
+  font-size: 0.85rem;
+}
+
+/* Botón de envío: el "pill" verde con glow, misma firma que la landing. */
+.auth-submit {
+  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  font-weight: 700;
+  font-size: 1rem;
+  padding: 0.85rem 1.6rem;
+  border-radius: 999px;
+  color: #ffffff;
+  background: var(--pp-brand);
+  box-shadow: 0 10px 26px -10px rgba(99, 133, 90, 0.6);
+  cursor: pointer;
+  transition:
+    transform 0.18s ease,
+    background-color 0.18s ease,
+    box-shadow 0.18s ease;
+}
+.auth-submit:hover:not(:disabled) {
+  transform: translateY(-2px);
+  background: var(--pp-brand-strong);
+  box-shadow: 0 16px 32px -10px rgba(99, 133, 90, 0.7);
+}
+.auth-submit:focus-visible {
+  outline: 2px solid var(--pp-brand);
+  outline-offset: 3px;
+}
+.auth-submit:disabled {
+  opacity: 0.65;
+  cursor: default;
+}
+
+.auth-spinner {
+  width: 1.05em;
+  height: 1.05em;
+  border: 2px solid rgba(255, 255, 255, 0.5);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: auth-spin 0.6s linear infinite;
+}
+
+.auth-divider {
+  height: 1px;
+  border: 0;
+  background: var(--pp-border);
+  margin: 1.5rem 0 1.25rem;
+}
+
+.auth-foot {
+  text-align: center;
+  font-size: 0.92rem;
+  color: var(--pp-muted);
+}
+.auth-link {
+  color: var(--pp-brand);
+  font-weight: 700;
+}
+.auth-link:hover {
+  color: var(--pp-brand-strong);
+}
+
+@keyframes auth-rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes auth-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .auth-card {
+    animation: none;
+  }
+  .auth-submit {
+    transition: none;
+  }
+}
