@@ -1,5 +1,3 @@
-import { fileURLToPath } from "node:url";
-import vuetify, { transformAssetUrls } from "vite-plugin-vuetify";
 import tailwindcss from "@tailwindcss/vite";
 
 export default defineNuxtConfig({
@@ -11,34 +9,6 @@ export default defineNuxtConfig({
 
   ssr: true,
 
-  nitro: {
-    // El SDK de pump.fun (y su dep agent-payments-sdk) hace named imports de
-    // `@coral-xyz/anchor`, que es CommonJS. En dev Nitro externaliza los paquetes
-    // y los carga como ESM nativo de Node → "Named export 'BN' not found". Hay que
-    // inline TODA la cadena (incluidos anchor y bn.js) para que Nitro la bundlee
-    // (rollup) y resuelva el interop CJS, igual que ya hace el build de producción.
-    externals: {
-      inline: [
-        "@pump-fun/pump-sdk",
-        "@pump-fun/agent-payments-sdk",
-        "@coral-xyz/anchor",
-        "bn.js",
-        // En Node (Vercel) @solana/web3.js arrastra un import ESM a
-        // `jayson/lib/client/browser` que falla si queda externalizado.
-        // Inlinar ambos evita el import de directorio en runtime.
-        "@solana/web3.js",
-        "jayson",
-      ],
-    },
-  },
-
-  runtimeConfig: {
-    public: {
-      // RPC de Solana usado por el cliente para enviar/confirmar el lanzamiento.
-      solanaRpcUrl:
-        process.env.SOLANA_RPC_URL || "https://api.mainnet-beta.solana.com",
-    },
-  },
   app: {
     head: {
       meta: [
@@ -51,18 +21,9 @@ export default defineNuxtConfig({
     },
   },
 
-  // ✅ Solo main.css - todo se importa desde ahí
   css: ["./app/assets/css/main.css"],
 
-  modules: [
-    "@nuxtjs/i18n",
-    "nuxt-auth-utils",
-    (_options, nuxt) => {
-      nuxt.hooks.hook("vite:extendConfig", (config) => {
-        config.plugins?.push(vuetify({ autoImport: true }));
-      });
-    },
-  ],
+  modules: ["@nuxtjs/i18n"],
 
   i18n: {
     locales: [
@@ -79,36 +40,7 @@ export default defineNuxtConfig({
     },
   },
 
-  alias: {
-    "@": fileURLToPath(new URL("./", import.meta.url)),
-    "~": fileURLToPath(new URL("./", import.meta.url)),
-  },
-
-  build: {
-    transpile: ["vuetify"],
-  },
-
   vite: {
     plugins: [tailwindcss()],
-    vue: {
-      template: {
-        transformAssetUrls,
-      },
-    },
-    ssr: {
-      noExternal: ["vuetify"],
-    },
-    define: {
-      "process.env.DEBUG": false,
-      global: "globalThis",
-    },
-    resolve: {
-      alias: {
-        buffer: "buffer/",
-      },
-    },
-    optimizeDeps: {
-      include: ["@solana/web3.js", "@solana/kit", "buffer"],
-    },
   },
 });

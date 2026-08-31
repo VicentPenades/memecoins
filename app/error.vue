@@ -30,7 +30,7 @@ const handleError = () => clearError({ redirect: "/" });
     <p class="text-8xl font-bold text-[var(--primary)] mb-4">
       {{ error?.statusCode || 500 }}
     </p>
-    <h1 class="text-2xl font-semibold text-[var(--mc-bw-text-primary)] mb-2">
+    <h1 class="text-2xl font-semibold text-[var(--text-primary)] mb-2">
       {{ title }}
     </h1>
     <p class="text-[var(--text-secondary)] max-w-md mb-8">

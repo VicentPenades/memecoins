@@ -1,6 +1,4 @@
-/* Custom CSS Variables */
 :root {
-  /* Primary colors */
   --primary: #63855a;
   --secondary: #ff375e;
   --success: #92c089;
@@ -9,26 +7,11 @@
   --error: #e37272;
   --accent: #05603d;
 
-  /* Background colors */
   --bg-main: #ffffff;
-  --bg-nav: #f3f3f3;
-  --border-default: #bbbbbb;
-  /* Gris sutil del layout: fondo sobre el que "flotan" las tarjetas/filas */
-  --mc-bw-gray-subtle: #ebeeef;
+  --bg-subtle: #ebeeef;
 
-  /* Texts */
-  --text-primary: #5c5c5c;
+  --text-primary: #1e2326;
   --text-secondary: #8e8e8e;
 
-  /* Black & White palette */
-  --mc-bw-text-primary: #1e2326;
-  --mc-bw-grey-darken-1: #4a575e;
-
-  /* Empty state */
-  --empty-state-bg: #f5f7f8;
-  --empty-state-icon-bg: #e8edee;
-  --empty-state-icon-color: #4a575e;
-  --empty-state-secondary-bg: #fef6f0;
-  --empty-state-secondary-icon-bg: #fde8d8;
-  --empty-state-secondary-icon-color: #d97b3a;
+  --border-default: #bbbbbb;
 }
