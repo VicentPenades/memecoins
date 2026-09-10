@@ -27,6 +27,7 @@ const handleError = () => clearError({ redirect: "/" });
   <div
     class="flex flex-col items-center justify-center min-h-screen px-4 text-center"
   >
+    a
     <p class="text-8xl font-bold text-[var(--primary)] mb-4">
       {{ error?.statusCode || 500 }}
     </p>
