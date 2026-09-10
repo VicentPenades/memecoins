@@ -1,5 +1,28 @@
+<script setup lang="ts">
+import { COIN } from "~/data/coin";
+
+useHead({
+  title: `${COIN.name} (${COIN.ticker})`,
+  meta: [
+    { name: "description", content: COIN.description },
+    { property: "og:title", content: `${COIN.name} — ${COIN.tagline}` },
+    { property: "og:description", content: COIN.description },
+    { property: "og:image", content: COIN.logo },
+    { name: "twitter:card", content: "summary_large_image" },
+    { name: "twitter:title", content: `${COIN.name} (${COIN.ticker})` },
+    { name: "twitter:description", content: COIN.description },
+  ],
+});
+</script>
+
 <template>
-  <div class="flex items-center justify-center min-h-screen">
-    <h1 class="text-3xl font-bold">Welcome</h1>
+  <div >
+    <LandingHeader />
+    <LandingHero />
+    <LandingAbout />
+    <LandingTokenomics />
+    <LandingHowToBuy />
+    <LandingCommunity />
+    <LandingFooter />
   </div>
 </template>

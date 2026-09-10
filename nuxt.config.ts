@@ -9,6 +9,12 @@ export default defineNuxtConfig({
 
   ssr: true,
 
+  nitro: {
+    prerender: {
+      routes: ["/"],
+    },
+  },
+
   app: {
     head: {
       meta: [
@@ -17,7 +23,7 @@ export default defineNuxtConfig({
         { name: "robots", content: "index, follow" },
         { name: "author", content: "Vicent Penades" },
       ],
-      link: [{ rel: "icon", type: "image/svg+xml", href: "/favicon.png" }],
+      link: [{ rel: "icon", type: "image/svg+xml", href: "/favicon.jpeg" }],
     },
   },
 
