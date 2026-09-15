@@ -27,7 +27,6 @@ const handleError = () => clearError({ redirect: "/" });
   <div
     class="flex flex-col items-center justify-center min-h-screen px-4 text-center"
   >
-    a
     <p class="text-8xl font-bold text-[var(--primary)] mb-4">
       {{ error?.statusCode || 500 }}
     </p>
@@ -38,7 +37,7 @@ const handleError = () => clearError({ redirect: "/" });
       {{ description }}
     </p>
     <button
-      class="px-6 py-3 rounded-lg bg-[var(--primary)] text-white font-medium hover:opacity-90 transition-opacity cursor-pointer"
+      class="px-6 py-3 rounded-lg bg-[var(--primary)] text-[var(--text-primary)] font-medium hover:opacity-90 transition-opacity cursor-pointer"
       @click="handleError"
     >
       Back to home

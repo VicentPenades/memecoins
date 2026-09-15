@@ -23,11 +23,14 @@ export type HowToBuyStep = {
 };
 
 export type CoinConfig = {
-  name: string;
-  ticker: string;
-  tagline: string;
-  description: string;
-  logo: string;
+  general: {
+    name: string;
+    ticker: string;
+    tagline: string;
+    description: string;
+    logo: string;
+    footer_disclaimer: string;
+  };
 
   hero: {
     headline: string;
@@ -59,9 +62,5 @@ export type CoinConfig = {
     title: string;
     description: string;
     socials: SocialLink[];
-  };
-
-  footer: {
-    disclaimer: string;
   };
 };

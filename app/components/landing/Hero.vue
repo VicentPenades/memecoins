@@ -1,9 +1,20 @@
 <template>
-  <CommonSection id="home" background-color="#020617">
-    <div class="relative grid w-full grid-cols-1 lg:grid-cols-2 items-center">
+  <CommonSection id="home" background-color="var(--bg-hero)">
+    <!-- Capa de partículas de fondo (particles.js escribe su canvas aquí) -->
+    <div
+      id="hero-particles"
+      class="absolute inset-0 pointer-events-none"
+      aria-hidden="true"
+    />
+
+    <div
+      class="relative z-10 grid w-full grid-cols-1 lg:grid-cols-2 items-center"
+    >
       <div
         ref="gameContainer"
         class="relative h-[420px] w-full pointer-events-auto"
+        role="img"
+        aria-label="Interactive mini-game: feed the rocket cat with fish to stack more cats and send $CATSZN to the moon"
       />
       <div class="relative text-center">
         <CommonSectionHeader
@@ -14,10 +25,13 @@
 
         <!-- TICKER & HEADLINE -->
         <CommonPill variant="hero">
-          {{ COIN.ticker }}
+          {{ COIN.general.ticker }}
         </CommonPill>
 
-        <p class="text-base md:text-lg text-slate-400 max-w-xl mx-auto mb-8">
+        <p
+          class="text-base md:text-lg max-w-xl mx-auto mb-8"
+          style="color: var(--text-muted)"
+        >
           {{ COIN.hero.subheadline }}
         </p>
 
@@ -31,17 +45,25 @@
 
 <script setup lang="ts">
 import { ref, nextTick, onMounted, onUnmounted } from "vue";
+import type { Game } from "phaser";
 import { COIN } from "~/data/coin";
 
 const gameContainer = ref<HTMLDivElement | null>(null);
-let phaserGame: any = null;
+let phaserGame: Game | null = null;
 
 // --- EFECTOS DE SONIDO SINTETIZADOS (Web Audio API) ---
 // Se reutiliza un único AudioContext en lugar de crear uno nuevo por sonido.
+// Safari antiguo expone el constructor como `webkitAudioContext`.
+type WindowWithWebkitAudio = Window & {
+  webkitAudioContext?: typeof AudioContext;
+};
+
 let audioCtx: AudioContext | null = null;
 const getAudioCtx = () => {
   if (!audioCtx) {
-    const Ctx = window.AudioContext || (window as any).webkitAudioContext;
+    const Ctx =
+      window.AudioContext ||
+      (window as WindowWithWebkitAudio).webkitAudioContext;
     if (Ctx) audioCtx = new Ctx();
   }
   if (audioCtx?.state === "suspended") audioCtx.resume();
@@ -74,7 +96,7 @@ const playSound = (type: "eat" | "pump") => {
       osc.start();
       osc.stop(ctx.currentTime + 0.5);
     }
-  } catch (e) {
+  } catch {
     // Audio no permitido sin interacción previa
   }
 };
@@ -83,7 +105,7 @@ const playSound = (type: "eat" | "pump") => {
 // La librería vive en app/assets/js y se auto-registra en `window.particlesJS`.
 type ParticlesJS = (tagId: string, params: Record<string, unknown>) => void;
 
-const initParticles = async () => {
+const initParticles = async (reducedMotion: boolean) => {
   await import("~/assets/js/particles.js");
   await nextTick();
 
@@ -93,7 +115,11 @@ const initParticles = async () => {
 
   particlesJS("hero-particles", {
     particles: {
-      number: { value: 70, density: { enable: true, value_area: 800 } },
+      // Con "reduce motion" bajamos densidad y desactivamos el movimiento.
+      number: {
+        value: reducedMotion ? 30 : 70,
+        density: { enable: true, value_area: 800 },
+      },
       color: { value: ["#f59e0b", "#10b981"] },
       shape: { type: "circle" },
       opacity: { value: 0.5, random: true },
@@ -105,7 +131,7 @@ const initParticles = async () => {
         opacity: 0.25,
         width: 1,
       },
-      move: { enable: true, speed: 1.5, out_mode: "out" },
+      move: { enable: !reducedMotion, speed: 1.5, out_mode: "out" },
     },
     interactivity: {
       // La capa es pointer-events-none (no roba clics al juego), así que
@@ -121,12 +147,20 @@ const initParticles = async () => {
   });
 };
 
-// --- MOTOR DEL JUEGO (PHASER 3) ---
+// --- MOTOR DEL JUEGO (PHASER 4) ---
 onMounted(async () => {
   if (import.meta.server) return;
 
-  // Fondo de partículas primero (no bloquea el resto del montaje)
-  initParticles();
+  // Respeta la preferencia del sistema de reducir animaciones.
+  const reducedMotion = window.matchMedia(
+    "(prefers-reduced-motion: reduce)",
+  ).matches;
+
+  // Fondo de partículas primero (no bloquea el resto del montaje).
+  // Capturamos el error para que un fallo de la librería no quede en silencio.
+  initParticles(reducedMotion).catch((error: unknown) => {
+    console.error("Error inicializando las partículas del hero:", error);
+  });
 
   const Phaser = (await import("phaser")).default;
 
@@ -136,6 +170,9 @@ onMounted(async () => {
     feedStatus!: Phaser.GameObjects.Text;
     mouthZone!: Phaser.GameObjects.Zone;
     candle!: Phaser.GameObjects.Rectangle;
+    moon!: Phaser.GameObjects.Container;
+    // Gatos pasajeros que se apilan sobre el cohete (crecen al alimentar)
+    passengerCats: Phaser.GameObjects.Text[] = [];
     feedCounter = 0;
     catBaseY = 0;
     catX = 0;
@@ -143,6 +180,11 @@ onMounted(async () => {
     climbPerFish = 34;
     // Número de peces necesarios para el evento pump
     feedGoal = 5;
+    // Layout de la pila de gatos sobre el cohete
+    maxPassengerRow = 3;
+    passengerSpacingX = 32;
+    passengerSpacingY = 30;
+    passengerBaseOffsetY = -78;
 
     constructor() {
       super({ key: "CatGameScene" });
@@ -158,6 +200,13 @@ onMounted(async () => {
 
     startIdleFloatAt(baseY: number) {
       this.tweens.killTweensOf(this.cat);
+      // Sin animación de flotación si el usuario prefiere menos movimiento.
+      if (reducedMotion) {
+        this.cat.y = baseY;
+        this.cat.angle = 0;
+        this.mouthZone.y = baseY;
+        return;
+      }
       this.tweens.add({
         targets: this.cat,
         y: baseY - 8,
@@ -180,16 +229,18 @@ onMounted(async () => {
       this.catX = catX;
       this.catBaseY = catY;
 
-      const moonX = width - Math.max(60, width * 0.1);
-      const moonY = Math.max(60, height * 0.1);
-      this.add.circle(moonX, moonY, 48, 0xfef3c7, 0.12).setDepth(-2);
-      this.add
-        .circle(moonX, moonY, 36, 0xfef3c7)
-        .setStrokeStyle(3, 0xfde68a, 0.8)
+      // Luna en un contenedor para poder reposicionarla al redimensionar.
+      this.moon = this.add
+        .container(this.moonX(width), this.moonY(height), [
+          this.add.circle(0, 0, 48, 0xfef3c7, 0.12),
+          this.add
+            .circle(0, 0, 36, 0xfef3c7)
+            .setStrokeStyle(3, 0xfde68a, 0.8),
+          this.add.circle(-12, -8, 7, 0xd6d3d1, 0.35),
+          this.add.circle(13, 10, 5, 0xd6d3d1, 0.3),
+          this.add.circle(10, -15, 4, 0xd6d3d1, 0.25),
+        ])
         .setDepth(-1);
-      this.add.circle(moonX - 12, moonY - 8, 7, 0xd6d3d1, 0.35).setDepth(-1);
-      this.add.circle(moonX + 13, moonY + 10, 5, 0xd6d3d1, 0.3).setDepth(-1);
-      this.add.circle(moonX + 10, moonY - 15, 4, 0xd6d3d1, 0.25).setDepth(-1);
 
       this.feedStatus = this.add
         .text(18, 18, `FEED THE CAT · 0/${this.feedGoal}`, {
@@ -212,11 +263,14 @@ onMounted(async () => {
         .setDisplaySize(320, 174.4)
         .setInteractive();
 
+      // Zona de la boca (Detección de colisión), centrada en el gato
+      this.mouthZone = this.add.zone(catX, catY + 10, 100, 100);
+
       // --- ANIMACIÓN IDLE: el cohete flota/se balancea suavemente ---
       this.startIdleFloat();
 
-      // Zona de la boca (Detección de colisión), centrada en el gato
-      this.mouthZone = this.add.zone(catX, catY + 10, 100, 100);
+      // Primer gato pasajero sobre el cohete (la pila arranca con uno)
+      this.addPassengerCat();
 
       // Crear pescados interactivos
       this.spawnFish();
@@ -225,6 +279,78 @@ onMounted(async () => {
       this.candle = this.add
         .rectangle(width / 2, height + 100, 40, 0, 0x10b981)
         .setOrigin(0.5, 1);
+
+      // Reposicionar elementos clave cuando cambia el tamaño del contenedor.
+      this.scale.on("resize", this.handleResize, this);
+      this.events.once("shutdown", () => {
+        this.scale.off("resize", this.handleResize, this);
+      });
+    }
+
+    // Posición de la luna en la esquina superior derecha, según el tamaño.
+    moonX(width: number) {
+      return width - Math.max(60, width * 0.1);
+    }
+
+    moonY(height: number) {
+      return Math.max(60, height * 0.1);
+    }
+
+    handleResize(gameSize: Phaser.Structs.Size) {
+      const width = gameSize.width;
+      const height = gameSize.height;
+      if (!width || !height) return;
+
+      // Recolocar horizontalmente el cohete, su sombra y la zona de la boca.
+      this.catX = width / 2;
+      this.cat.x = this.catX;
+      this.mouthZone.x = this.catX;
+      this.catShadow.x = this.catX;
+
+      // Luna y vela a sus nuevas posiciones.
+      this.moon.setPosition(this.moonX(width), this.moonY(height));
+      this.candle.x = width / 2;
+    }
+
+    // Añade un gato a la pila con un pequeño "pop" de entrada.
+    addPassengerCat() {
+      const passenger = this.add
+        .text(this.cat.x, this.cat.y, "🐱", { fontSize: "30px" })
+        .setOrigin(0.5)
+        .setDepth(5);
+      this.passengerCats.push(passenger);
+
+      if (reducedMotion) {
+        passenger.setScale(1);
+        return;
+      }
+      passenger.setScale(0);
+      this.tweens.add({
+        targets: passenger,
+        scale: 1,
+        duration: 300,
+        ease: "Back.easeOut",
+      });
+    }
+
+    // Cada frame recoloca la pila de gatos relativa al cohete (pirámide).
+    override update(time: number) {
+      const total = this.passengerCats.length;
+      this.passengerCats.forEach((passenger, index) => {
+        const row = Math.floor(index / this.maxPassengerRow);
+        const col = index % this.maxPassengerRow;
+        const catsInRow = Math.min(
+          this.maxPassengerRow,
+          total - row * this.maxPassengerRow,
+        );
+        const dx = (col - (catsInRow - 1) / 2) * this.passengerSpacingX;
+        const dy = this.passengerBaseOffsetY - row * this.passengerSpacingY;
+        // Balanceo suave desfasado por gato (salvo "reduce motion")
+        const bob = reducedMotion ? 0 : Math.sin(time / 300 + index) * 3;
+        passenger.x = this.cat.x + dx;
+        passenger.y = this.cat.y + dy + bob;
+        passenger.setAngle(this.cat.angle * 0.5);
+      });
     }
 
     spawnFish() {
@@ -240,31 +366,36 @@ onMounted(async () => {
         .setInteractive({ draggable: true, useHandCursor: true });
 
       // Suave flotación mientras espera a ser arrastrado
-      this.tweens.add({
-        targets: fish,
-        y: startY - 8,
-        duration: 700,
-        yoyo: true,
-        repeat: -1,
-        ease: "Sine.easeInOut",
-      });
+      if (!reducedMotion) {
+        this.tweens.add({
+          targets: fish,
+          y: startY - 8,
+          duration: 700,
+          yoyo: true,
+          repeat: -1,
+          ease: "Sine.easeInOut",
+        });
+      }
 
       // Evento Arrastrar (Drag)
-      fish.on("drag", (pointer: any, dragX: number, dragY: number) => {
-        this.tweens.killTweensOf(fish);
-        fish.x = dragX;
-        fish.y = dragY;
+      fish.on(
+        "drag",
+        (_pointer: Phaser.Input.Pointer, dragX: number, dragY: number) => {
+          this.tweens.killTweensOf(fish);
+          fish.x = dragX;
+          fish.y = dragY;
 
-        // Comprobar si está cerca de la boca
-        if (
-          Phaser.Geom.Intersects.RectangleToRectangle(
-            fish.getBounds(),
-            this.mouthZone.getBounds(),
-          )
-        ) {
-          this.eatFish(fish);
-        }
-      });
+          // Comprobar si está cerca de la boca
+          if (
+            Phaser.Geom.Intersects.RectangleToRectangle(
+              fish.getBounds(),
+              this.mouthZone.getBounds(),
+            )
+          ) {
+            this.eatFish(fish);
+          }
+        },
+      );
 
       // Si se suelta sin llegar a la boca, vuelve a su sitio
       fish.on("dragend", () => {
@@ -303,6 +434,9 @@ onMounted(async () => {
       this.feedStatus.setText(
         `FEED THE CAT · ${this.feedCounter}/${this.feedGoal}`,
       );
+
+      // Cada pez comido suma un gato más a la pila del cohete
+      this.addPassengerCat();
 
       // El cohete asciende un poco más con cada pez comido
       this.tweens.killTweensOf(this.cat);
@@ -425,7 +559,9 @@ onMounted(async () => {
         duration: 1500,
         ease: "Bounce.easeOut",
         onComplete: () => {
-          setTimeout(() => {
+          // `delayedCall` está ligado al ciclo de vida de la escena: no dispara
+          // sobre objetos destruidos si el componente se desmonta antes.
+          this.time.delayedCall(3000, () => {
             // Reset tras la animación
             this.tweens.add({
               targets: bars,
@@ -440,6 +576,10 @@ onMounted(async () => {
                 bars.forEach((bar) => bar.destroy());
                 this.feedCounter = 0;
                 this.feedStatus.setText(`FEED THE CAT · 0/${this.feedGoal}`);
+                // La pila de gatos vuelve a empezar con uno solo
+                this.passengerCats.forEach((passenger) => passenger.destroy());
+                this.passengerCats = [];
+                this.addPassengerCat();
                 // El cohete vuelve a su posición base para empezar de nuevo
                 this.cat.y = this.catBaseY;
                 this.catShadow.setAlpha(0.3);
@@ -448,7 +588,7 @@ onMounted(async () => {
                 this.spawnFish();
               },
             });
-          }, 3000);
+          });
         },
       });
     }

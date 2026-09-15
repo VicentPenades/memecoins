@@ -21,7 +21,7 @@ import { COIN } from "~/data/coin";
             class="absolute top-4 right-4 w-8 h-8 rounded-full flex items-center justify-center text-xs font-black"
             style="
               background: linear-gradient(135deg, var(--primary), var(--accent));
-              color: #000;
+              color: var(--text-inverse);
             "
           >
             {{ i + 1 }}

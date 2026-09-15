@@ -1,5 +1,7 @@
 <script setup lang="ts">
-import { COIN_ABOUT } from "~/data/coin";
+import { COIN } from "~/data/coin";
+
+const COIN_ABOUT = COIN.about;
 </script>
 
 <template>

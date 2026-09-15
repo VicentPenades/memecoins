@@ -1,5 +1,6 @@
 :root {
   --primary: #F5A623;
+  --primary-light: #FDBE4B; /* amber claro para degradados */
   --secondary: #FF6B35;
   --success: #00FF88;
   --info: #00D4FF;
@@ -12,11 +13,18 @@
   --bg-section: #0d0d14;
   --bg-footer: #08080d;
   --bg-warm: #1a1200;
+  --bg-hero: #020617; /* fondo del juego del hero (space navy) */
   --bg-gradient: radial-gradient(ellipse at 50% 0%, var(--bg-warm) 0%, var(--bg-main) 60%);
 
   --text-primary: #ffffff;
   --text-secondary: #8b8b9e;
   --text-muted: #9a9ab0;
+  --text-inverse: #000000; /* texto sobre superficies claras/amber */
 
   --border-default: #2a2a3d;
+
+  /* Overlays / superficies y bordes translúcidos */
+  --overlay-dark: rgba(0, 0, 0, 0.4);
+  --overlay-light: rgba(255, 255, 255, 0.1);
+  --border-subtle: rgba(255, 255, 255, 0.05);
 }

@@ -17,8 +17,17 @@ withDefaults(
     :href="href"
     :target="target"
     :rel="rel"
-    class="inline-flex items-center gap-3 px-10 py-5 rounded-2xl text-lg font-black text-black bg-gradient-to-r from-amber-400 to-amber-500 hover:scale-105 shadow-[0_0_30px_rgba(245,158,11,0.4)] transition-all duration-200"
+    class="btn inline-flex items-center gap-3 px-10 py-5 rounded-2xl text-lg font-black hover:scale-105 transition-all duration-200"
   >
     <slot />
   </a>
 </template>
+
+<style scoped>
+/* Los colores se consumen siempre desde variables.css, nunca de Tailwind. */
+.btn {
+  color: var(--text-inverse);
+  background: linear-gradient(to right, var(--primary-light), var(--primary));
+  box-shadow: 0 0 30px color-mix(in srgb, var(--primary) 40%, transparent);
+}
+</style>

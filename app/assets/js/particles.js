@@ -1413,12 +1413,14 @@ var pJS = function(tag_id, params){
 
 /* ---------- global functions - vendors ------------ */
 
-Object.deepExtend = function(destination, source) {
+Object.deepExtend = function deepExtend(destination, source) {
   for (var property in source) {
     if (source[property] && source[property].constructor &&
      source[property].constructor === Object) {
       destination[property] = destination[property] || {};
-      arguments.callee(destination[property], source[property]);
+      // `arguments.callee` no es válido en modo estricto (módulos ES): usamos
+      // el nombre de la función para la recursión.
+      deepExtend(destination[property], source[property]);
     } else {
       destination[property] = source[property];
     }
