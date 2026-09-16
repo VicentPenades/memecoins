@@ -9,6 +9,11 @@ export default defineNuxtConfig({
 
   ssr: true,
 
+  runtimeConfig: {
+    databaseUrl: process.env.DATABASE_URL,
+    voteIpHashSecret: process.env.VOTE_IP_HASH_SECRET,
+  },
+
   nitro: {
     prerender: {
       routes: ["/"],

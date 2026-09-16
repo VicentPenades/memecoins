@@ -1,24 +1,8 @@
-<script setup lang="ts">
-import { COIN } from "~/data/coin";
-
-const platformIcons: Record<string, string> = {
-  twitter: "𝕏",
-  telegram: "✈️",
-  discord: "💬",
-  instagram: "📸",
-  tiktok: "🎵",
-  youtube: "▶️",
-  website: "🌐",
-};
-</script>
-
 <template>
   <CommonSection
     id="community"
-    height="auto"
     background-color="var(--bg-main)"
     :title="COIN.community.title"
-    divider-class="mb-8"
   >
     <!-- Background glow -->
     <div
@@ -51,11 +35,15 @@ const platformIcons: Record<string, string> = {
           <span
             class="flex items-center justify-center w-10 h-10 rounded-xl text-xl transition-all duration-300"
             style="
-              background-color: color-mix(in srgb, var(--primary) 15%, transparent);
+              background-color: color-mix(
+                in srgb,
+                var(--primary) 15%,
+                transparent
+              );
               color: var(--primary);
             "
           >
-            {{ platformIcons[social.platform] || "🔗" }}
+            {{ social.icon || "🔗" }}
           </span>
           <span>{{ social.label || social.platform }}</span>
         </a>
@@ -63,3 +51,7 @@ const platformIcons: Record<string, string> = {
     </div>
   </CommonSection>
 </template>
+
+<script setup lang="ts">
+import { COIN } from "~/data/coin";
+</script>

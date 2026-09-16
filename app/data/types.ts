@@ -7,6 +7,7 @@ export type SocialLink = {
     | "tiktok"
     | "youtube"
     | "website";
+  icon?: string;
   url: string;
   label?: string;
 };
@@ -14,6 +15,19 @@ export type SocialLink = {
 export type TokenomicsItem = {
   label: string;
   value: string;
+};
+
+export type CatCoin = {
+  slug: string;
+  name: string;
+  ticker: string;
+  chain: string;
+  emoji: string;
+  description: string;
+  dexScreener?: {
+    chainId: string;
+    tokenAddress: string;
+  };
 };
 
 export type HowToBuyStep = {
@@ -29,12 +43,12 @@ export type CoinConfig = {
     tagline: string;
     description: string;
     logo: string;
-    footer_disclaimer: string;
+    disclaimer: string;
   };
 
   hero: {
     headline: string;
-    subheadline: string;
+    subheadline: string[];
     ctaLabel: string;
     ctaUrl: string;
   };
@@ -51,6 +65,12 @@ export type CoinConfig = {
     items: TokenomicsItem[];
     contractAddress?: string;
     chain?: string;
+  };
+
+  catCoins: {
+    title: string;
+    description: string;
+    coins: CatCoin[];
   };
 
   howToBuy: {

@@ -1,23 +1,6 @@
-<script setup lang="ts">
-import { COIN } from "~/data/coin";
-
-const copied = ref(false);
-
-function copyAddress() {
-  if (COIN.tokenomics.contractAddress) {
-    navigator.clipboard.writeText(COIN.tokenomics.contractAddress);
-    copied.value = true;
-    setTimeout(() => {
-      copied.value = false;
-    }, 2000);
-  }
-}
-</script>
-
 <template>
   <CommonSection
     id="tokenomics"
-    height="auto"
     background-color="var(--bg-main)"
     :title="COIN.tokenomics.title"
   >
@@ -89,3 +72,19 @@ function copyAddress() {
     </div>
   </CommonSection>
 </template>
+
+<script setup lang="ts">
+import { COIN } from "~/data/coin";
+
+const copied = ref(false);
+
+function copyAddress() {
+  if (COIN.tokenomics.contractAddress) {
+    navigator.clipboard.writeText(COIN.tokenomics.contractAddress);
+    copied.value = true;
+    setTimeout(() => {
+      copied.value = false;
+    }, 2000);
+  }
+}
+</script>

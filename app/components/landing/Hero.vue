@@ -29,10 +29,12 @@
         </CommonPill>
 
         <p
+          v-for="(paragraph, i) in COIN.hero.subheadline"
+          :key="i"
           class="text-base md:text-lg max-w-xl mx-auto mb-8"
           style="color: var(--text-muted)"
         >
-          {{ COIN.hero.subheadline }}
+          {{ paragraph }}
         </p>
 
         <CommonButton :href="COIN.hero.ctaUrl">

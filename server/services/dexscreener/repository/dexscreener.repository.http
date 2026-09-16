@@ -1,0 +1,12 @@
+### Dexscreener Service — Tests manuales de endpoints externos
+### Extensión requerida: REST Client (humao.rest-client)
+###
+### Variables — cambia address y mint según la wallet/token a inspeccionar
+
+@mint = CcLd8HTAKLWtQHatqPwBQjtuCA72FNB9E1ckRTEzpump
+
+
+### ── 1. fetchDexscreenerTokenPairData ────────────────────────────────────────────
+
+GET https://api.dexscreener.com/tokens/v1/solana/{{mint}}
+

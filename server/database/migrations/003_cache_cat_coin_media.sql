@@ -1,0 +1,4 @@
+ALTER TABLE cat_coins
+  ADD COLUMN IF NOT EXISTS image_url TEXT,
+  ADD COLUMN IF NOT EXISTS header_url TEXT,
+  ADD COLUMN IF NOT EXISTS open_graph_url TEXT;

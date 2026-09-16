@@ -1,4 +1,5 @@
 import type { CoinConfig } from "./types";
+import { CAT_COINS } from "./cat-coins";
 
 // General information about the coin
 const COIN_GENERAL: CoinConfig["general"] = {
@@ -8,15 +9,17 @@ const COIN_GENERAL: CoinConfig["general"] = {
   description:
     "The purr-fect memecoin for cat lovers and degen enthusiasts. Community-driven, zero tax, 100% vibes.",
   logo: "/coins/catszn/logo.png",
-  footer_disclaimer:
+  disclaimer:
     "$CATSZN is a memecoin with no intrinsic value or expectation of financial return. It exists purely for entertainment purposes. Always do your own research.",
 };
 
 // Hero section information for the coin
 const COIN_HERO: CoinConfig["hero"] = {
   headline: "It's always Cat Season",
-  subheadline:
+  subheadline: [
     "Join the fluffiest community in crypto. No dogs allowed. $CATSZN is here to take over the blockchain, one purr at a time.",
+    "Sometimes BTC pumps, sometimes alts pumps, but we love cats. It's always $CATSZN.",
+  ],
   ctaLabel: "Buy $CATSZN Now 🚀",
   ctaUrl: "https://raydium.io/swap/?inputMint=sol&outputMint=CATSZN_ADDRESS",
 };
@@ -26,9 +29,7 @@ const COIN_ABOUT: CoinConfig["about"] = {
   title: "WTF is Cat Season? 🐱",
   paragraphs: [
     "$CATSZN is more than a token — it's a movement. Born from the collective energy of thousands of cat lovers in the crypto space, Cat Season represents the unstoppable rise of feline culture on the blockchain.",
-    "With zero taxes, a fully renounced contract, and a community that grows stronger every day, $CATSZN is the memecoin that doesn't need nine lives — one is enough to reach the moon. 🌙",
   ],
-  tags: ["Zero Tax", "Community Driven", "LP Burned", "Renounced"],
   image: "/coins/catszn/about.jpeg",
 };
 
@@ -42,6 +43,14 @@ const COIN_TOKENOMICS: CoinConfig["tokenomics"] = {
   ],
   contractAddress: "CATSZNxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
   chain: "Solana",
+};
+
+// Other cat coins in the ecosystem
+const COIN_CAT_COINS: CoinConfig["catCoins"] = {
+  title: "The Cat Coin Hall of Fame 🐈",
+  description:
+    "Cats already rule the internet. These feline coins prove they are coming for the blockchain too.",
+  coins: CAT_COINS,
 };
 
 // How to buy section information for the coin
@@ -83,18 +92,9 @@ const COIN_COMMUNITY: CoinConfig["community"] = {
   socials: [
     {
       platform: "twitter",
+      icon: "𝕏",
       url: "https://x.com/catszn_sol",
       label: "@catszn_sol",
-    },
-    {
-      platform: "telegram",
-      url: "https://t.me/catszn",
-      label: "t.me/catszn",
-    },
-    {
-      platform: "discord",
-      url: "https://discord.gg/catszn",
-      label: "Discord",
     },
   ],
 };
@@ -104,6 +104,7 @@ export const COIN: CoinConfig = {
   hero: COIN_HERO,
   about: COIN_ABOUT,
   tokenomics: COIN_TOKENOMICS,
+  catCoins: COIN_CAT_COINS,
   howToBuy: COIN_BUY,
   community: COIN_COMMUNITY,
 };
