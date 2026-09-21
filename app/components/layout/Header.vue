@@ -5,8 +5,7 @@ import { COIN } from "~/data/coin";
 const NAV_ITEMS = [
   { label: "Home", href: "#home" },
   { label: "About", href: "#about" },
-  { label: "Tokenomics", href: "#tokenomics" },
-  { label: "How to Buy", href: "#how-to-buy" },
+  { label: "Hall of Fame", href: "#cat-coins" },
   { label: "Community", href: "#community" },
 ];
 </script>
@@ -31,7 +30,7 @@ const NAV_ITEMS = [
     </div>
 
     <nav
-      class="relative z-10 w-full max-w-5xl overflow-x-auto"
+      class="nav-scroll relative z-10 w-full max-w-5xl overflow-x-auto overflow-y-hidden"
       aria-label="Main navigation"
     >
       <ul class="flex min-w-max items-center justify-center gap-2 sm:gap-6">
@@ -71,5 +70,13 @@ const NAV_ITEMS = [
 
 .nav-link:hover {
   background: var(--overlay-light);
+}
+
+.nav-scroll {
+  scrollbar-width: none;
+}
+
+.nav-scroll::-webkit-scrollbar {
+  display: none;
 }
 </style>

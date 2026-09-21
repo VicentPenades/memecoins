@@ -26,9 +26,9 @@ useHead({
     <LayoutHeader />
     <LandingHero />
     <LandingAbout />
-    <LandingTokenomics />
+    <!-- <LandingTokenomics /> -->
     <LandingCatCoins />
-    <LandingHowToBuy />
+    <!-- <LandingHowToBuy /> -->
     <LandingCommunity />
     <LayoutFooter />
   </div>

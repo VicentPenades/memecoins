@@ -86,15 +86,41 @@ const COIN_BUY: CoinConfig["howToBuy"] = {
 
 // Community section information for the coin
 const COIN_COMMUNITY: CoinConfig["community"] = {
-  title: "Join the Degen Army 🐾",
+  title: "Building a Better Community 🐾",
   description:
-    "Cat Season is nothing without its community. Connect with fellow degens across the internet.",
+    "We are trying to build an honest, clean and welcoming community around Cat Season — one where everyone plays by the same rules.",
+  rules: [
+    {
+      icon: "👥",
+      title: "No insider circles",
+      description:
+        "No private groups with privileged access or special treatment.",
+    },
+    {
+      icon: "🔎",
+      title: "Transparency first",
+      description:
+        "Important information and decisions should be shared openly with everyone.",
+    },
+    {
+      icon: "🚫",
+      title: "No fake hype",
+      description:
+        "No paid shilling, misleading promises or coordinated pump-and-dump games.",
+    },
+    {
+      icon: "🤝",
+      title: "Respect the community",
+      description:
+        "Be helpful, stay honest and remember that everyone is responsible for their own decisions.",
+    },
+  ],
   socials: [
     {
       platform: "twitter",
       icon: "𝕏",
-      url: "https://x.com/catszn_sol",
-      label: "@catszn_sol",
+      url: "https://x.com/catszn_solana",
+      label: "@catszn_solana",
     },
   ],
 };

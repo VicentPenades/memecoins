@@ -4,7 +4,7 @@
     background-color="var(--bg-subtle)"
     :title="COIN.catCoins.title"
   >
-    <div class="mx-auto max-w-5xl">
+    <div class="mx-auto max-w-6xl">
       <p
         class="mx-auto mb-3 max-w-2xl text-center text-base leading-relaxed md:text-lg"
         style="color: var(--text-muted)"
@@ -41,26 +41,59 @@
             style="
               color: var(--text-primary);
               background-color: var(--bg-main);
-              border-color: color-mix(
-                in srgb,
-                var(--primary) 18%,
-                transparent
-              );
+              border-color: color-mix(in srgb, var(--primary) 18%, transparent);
             "
           />
         </label>
 
+        <label class="relative sm:w-44">
+          <span class="sr-only">Sort cat coins</span>
+          <svg
+            class="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2"
+            style="color: var(--primary)"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            aria-hidden="true"
+          >
+            <path d="M3 6h18M6 12h12M10 18h4" />
+          </svg>
+          <select
+            v-model="sortBy"
+            class="w-full appearance-none rounded-xl border py-3 pl-11 pr-10 text-sm font-black outline-none transition-colors focus:border-[var(--primary)]"
+            style="
+              color: var(--primary);
+              background-color: var(--bg-main);
+              border-color: color-mix(in srgb, var(--primary) 25%, transparent);
+            "
+          >
+            <option value="votes">Votes</option>
+            <option value="change">24h</option>
+            <option value="marketCap">Market cap</option>
+            <option value="liquidity">Liquidity</option>
+            <option value="volume">Volume 24h</option>
+          </select>
+          <svg
+            class="pointer-events-none absolute right-4 top-1/2 size-4 -translate-y-1/2"
+            style="color: var(--primary)"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            aria-hidden="true"
+          >
+            <path d="m6 9 6 6 6-6" />
+          </svg>
+        </label>
+
         <button
           type="button"
-          class="inline-flex min-w-36 items-center justify-center gap-2 rounded-xl border px-5 py-3 text-sm font-black transition-all duration-200 hover:-translate-y-0.5"
+          class="hidden min-w-36 items-center justify-center gap-2 rounded-xl border px-5 py-3 text-sm font-black transition-all duration-200 hover:-translate-y-0.5 md:inline-flex"
           style="
             color: var(--primary);
             background-color: var(--bg-main);
-            border-color: color-mix(
-              in srgb,
-              var(--primary) 25%,
-              transparent
-            );
+            border-color: color-mix(in srgb, var(--primary) 25%, transparent);
           "
           :aria-label="`Switch to ${viewMode === 'table' ? 'card' : 'table'} view`"
           @click="toggleView"
@@ -103,113 +136,62 @@
         {{ filteredItems.length === 1 ? "coin" : "coins" }}
       </p>
 
-      <UiDataTable
-        v-if="viewMode === 'table'"
-        :headers="headers"
-        :items="filteredItems"
-        :loading="isLoading || isMarketLoading"
-        item-value="slug"
-        :items-per-page="10"
-        hide-footer
-        :total-items="tableItems.length"
+      <div :class="viewMode === 'table' ? 'hidden md:block' : 'hidden'">
+        <UiDataTable
+          v-if="viewMode === 'table'"
+          :headers="headers"
+          :items="filteredItems"
+          :loading="isLoading || isMarketLoading"
+          item-value="slug"
+          :items-per-page="10"
+          hide-footer
+          :total-items="tableItems.length"
       >
         <template #item.coin="{ item }">
-          <div class="min-w-52">
-            <div>
-              <p class="font-black" style="color: var(--text-primary)">
-                {{ item.name }}
-              </p>
-              <p class="text-sm font-bold" style="color: var(--primary)">
-                {{ item.ticker }} · {{ item.chain }}
-              </p>
+          <div
+            class="relative min-w-64 overflow-hidden rounded-xl"
+            :style="{
+              backgroundImage: getImageUrl(item.media, 'header')
+                ? `linear-gradient(90deg, var(--bg-main) 38%, color-mix(in srgb, var(--bg-main) 55%, transparent) 75%, transparent), url(${getImageUrl(item.media, 'header')})`
+                : 'none',
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+            }"
+          >
+            <div class="flex items-center gap-3 p-2">
+              <a
+                v-if="
+                  item.media?.imageUrl &&
+                  !hasImageFailed(item.slug, 'thumbnail')
+                "
+                :href="item.media.imageUrl"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="block size-14 shrink-0 overflow-hidden rounded-xl border-2"
+                style="border-color: var(--bg-main)"
+              >
+                <img
+                  :src="item.media.imageUrl"
+                  :alt="`${item.name} thumbnail`"
+                  class="size-full object-cover"
+                  loading="lazy"
+                  decoding="async"
+                  referrerpolicy="no-referrer"
+                  @error="markImageAsFailed(item.slug, 'thumbnail')"
+                />
+              </a>
+              <LandingImageFallback v-else :emoji="item.emoji" />
+
+              <div>
+                <p class="font-black" style="color: var(--text-primary)">
+                  {{ item.name }}
+                </p>
+                <p class="text-sm font-bold" style="color: var(--primary)">
+                  {{ item.ticker }} · {{ item.chain }}
+                </p>
+              </div>
             </div>
           </div>
-        </template>
-
-        <template #item.thumbnail="{ item }">
-          <a
-            v-if="
-              item.media?.imageUrl &&
-              !hasImageFailed(item.slug, 'thumbnail')
-            "
-            :href="item.media.imageUrl"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="block size-14 overflow-hidden rounded-xl"
-          >
-            <img
-              :src="item.media.imageUrl"
-              :alt="`${item.name} thumbnail`"
-              class="size-full object-cover"
-              loading="lazy"
-              decoding="async"
-              referrerpolicy="no-referrer"
-              @error="markImageAsFailed(item.slug, 'thumbnail')"
-            />
-          </a>
-          <LandingImageFallback v-else :emoji="item.emoji" />
-        </template>
-
-        <template #item.header="{ item }">
-          <a
-            v-if="
-              getImageUrl(item.media, 'header') &&
-              !hasImageFailed(item.slug, 'header')
-            "
-            :href="getImageUrl(item.media, 'header')!"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="block h-14 w-28 overflow-hidden rounded-lg"
-          >
-            <img
-              :src="getImageUrl(item.media, 'header')!"
-              :alt="`${item.name} header`"
-              class="size-full object-cover"
-              loading="lazy"
-              decoding="async"
-              referrerpolicy="no-referrer"
-              @error="markImageAsFailed(item.slug, 'header')"
-            />
-          </a>
-          <LandingImageFallback v-else />
-        </template>
-
-        <template #item.openGraph="{ item }">
-          <a
-            v-if="
-              getImageUrl(item.media, 'openGraph') &&
-              !hasImageFailed(item.slug, 'openGraph')
-            "
-            :href="getImageUrl(item.media, 'openGraph')!"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="block h-14 w-28 overflow-hidden rounded-lg"
-          >
-            <img
-              :src="getImageUrl(item.media, 'openGraph')!"
-              :alt="`${item.name} Open Graph image`"
-              class="size-full object-cover"
-              loading="lazy"
-              decoding="async"
-              referrerpolicy="no-referrer"
-              @error="markImageAsFailed(item.slug, 'openGraph')"
-            />
-          </a>
-          <LandingImageFallback v-else />
-        </template>
-
-        <template #item.price="{ item }">
-          <a
-            v-if="item.market"
-            :href="item.market.dexUrl"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="whitespace-nowrap font-bold hover:underline"
-            style="color: var(--text-primary)"
-          >
-            {{ formatPrice(item.market.priceUsd) }}
-          </a>
-          <span v-else style="color: var(--text-muted)">—</span>
         </template>
 
         <template #item.change="{ item }">
@@ -224,80 +206,99 @@
           <span v-else style="color: var(--text-muted)">—</span>
         </template>
 
+        <template #item.liquidity="{ item }">
+          <span class="whitespace-nowrap font-bold">
+            {{ item.market ? formatCompactUsd(item.market.liquidityUsd) : "—" }}
+          </span>
+        </template>
+
         <template #item.marketCap="{ item }">
           <span class="whitespace-nowrap font-bold">
-            {{
-              item.market ? formatCompactUsd(item.market.marketCapUsd) : "—"
-            }}
+            {{ item.market ? formatCompactUsd(item.market.marketCapUsd) : "—" }}
           </span>
         </template>
 
         <template #item.volume="{ item }">
           <span class="whitespace-nowrap font-bold">
-            {{
-              item.market ? formatCompactUsd(item.market.volume24hUsd) : "—"
-            }}
+            {{ item.market ? formatCompactUsd(item.market.volume24hUsd) : "—" }}
           </span>
         </template>
 
+        <template #item.links="{ item }">
+          <a
+            v-if="item.market"
+            :href="item.market.dexUrl"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="inline-flex items-center gap-1 whitespace-nowrap rounded-lg px-2 py-1 text-xs font-black transition-colors hover:underline"
+            style="color: var(--primary)"
+          >
+            Dexscreener
+            <svg
+              class="size-3.5"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+              aria-hidden="true"
+            >
+              <path d="M7 17 17 7M9 7h8v8" />
+            </svg>
+          </a>
+          <span v-else style="color: var(--text-muted)">—</span>
+        </template>
+
         <template #item.votes="{ item }">
-          <div class="flex justify-end">
+          <div class="flex justify-center">
             <button
               type="button"
-              class="flex min-w-20 flex-col items-center justify-center rounded-xl px-3 py-2 font-black transition-all duration-200"
+              class="inline-flex min-w-16 items-center justify-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-black transition-all duration-200"
               :class="
                 hasVotedFor(item.slug)
                   ? 'text-white'
-                  : isLoading ||
-                      votingSlug !== null ||
-                      hasLoadError
+                  : isLoading || votingSlug !== null || hasLoadError
                     ? 'cursor-not-allowed opacity-40'
-                    : 'hover:-translate-y-0.5'
+                    : 'hover:border-[var(--primary)]'
               "
               :style="{
-                backgroundColor:
-                  hasVotedFor(item.slug)
-                    ? 'var(--primary)'
-                    : 'color-mix(in srgb, var(--primary) 14%, transparent)',
-                color:
-                  hasVotedFor(item.slug)
-                    ? '#ffffff'
-                    : 'var(--primary)',
+                backgroundColor: hasVotedFor(item.slug)
+                  ? 'var(--primary)'
+                  : 'transparent',
+                borderColor: hasVotedFor(item.slug)
+                  ? 'var(--primary)'
+                  : 'color-mix(in srgb, var(--primary) 28%, transparent)',
+                color: hasVotedFor(item.slug) ? '#ffffff' : 'var(--primary)',
               }"
-              :disabled="
-                hasVotedFor(item.slug) ||
-                isLoading ||
-                votingSlug !== null ||
-                hasLoadError
-              "
+              :disabled="isVoteDisabled(item.slug)"
               :aria-label="`Vote for ${item.name}`"
               @click="vote(item.slug)"
             >
-              <span class="text-2xl leading-none" aria-hidden="true">
+              <span class="text-base leading-none" aria-hidden="true">
                 {{ hasVotedFor(item.slug) ? "♥" : "♡" }}
               </span>
-              <span class="mt-1 text-sm">
+              <span>
                 {{ formatVotes(getVoteCount(item.slug)) }}
               </span>
             </button>
           </div>
         </template>
       </UiDataTable>
+      </div>
 
-      <div
-        v-else-if="filteredItems.length > 0"
-        class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3"
-      >
+      <div :class="viewMode === 'table' ? 'md:hidden' : ''">
+        <div
+          v-if="filteredItems.length > 0"
+          class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3"
+        >
         <article
           v-for="item in filteredItems"
           :key="item.slug"
           class="group overflow-hidden rounded-2xl border transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
           :style="{
             backgroundColor: 'var(--bg-main)',
-            borderColor:
-              hasVotedFor(item.slug)
-                ? 'var(--primary)'
-                : 'color-mix(in srgb, var(--primary) 18%, transparent)',
+            borderColor: hasVotedFor(item.slug)
+              ? 'var(--primary)'
+              : 'color-mix(in srgb, var(--primary) 18%, transparent)',
           }"
         >
           <a
@@ -443,14 +444,10 @@
                       : 'hover:-translate-y-0.5'
                 "
                 :style="{
-                  backgroundColor:
-                    hasVotedFor(item.slug)
-                      ? 'var(--primary)'
-                      : 'color-mix(in srgb, var(--primary) 14%, transparent)',
-                  color:
-                    hasVotedFor(item.slug)
-                      ? '#ffffff'
-                      : 'var(--primary)',
+                  backgroundColor: hasVotedFor(item.slug)
+                    ? 'var(--primary)'
+                    : 'color-mix(in srgb, var(--primary) 14%, transparent)',
+                  color: hasVotedFor(item.slug) ? '#ffffff' : 'var(--primary)',
                 }"
                 :disabled="isVoteDisabled(item.slug)"
                 :aria-label="`Vote for ${item.name}`"
@@ -472,14 +469,11 @@
         style="
           color: var(--text-muted);
           background-color: var(--bg-main);
-          border-color: color-mix(
-            in srgb,
-            var(--primary) 18%,
-            transparent
-          );
+          border-color: color-mix(in srgb, var(--primary) 18%, transparent);
         "
       >
         No coins match “{{ searchQuery }}”.
+      </div>
       </div>
 
       <p
@@ -545,10 +539,9 @@ type MarketsResponse = {
   unavailable: string[];
 };
 
-type CoinMedia = Pick<
-  MarketData,
-  "imageUrl" | "headerUrl" | "openGraphUrl"
->;
+type CoinMedia = Pick<MarketData, "imageUrl" | "headerUrl" | "openGraphUrl">;
+
+type SortKey = "votes" | "change" | "marketCap" | "liquidity" | "volume";
 
 const voteCounts = ref<Record<string, number>>({});
 const markets = ref<Record<string, MarketData | null>>({});
@@ -561,23 +554,22 @@ const isMarketLoading = ref(true);
 const hasLoadError = ref(false);
 const errorMessage = ref("");
 const searchQuery = ref("");
+const sortBy = ref<SortKey>("votes");
 const viewMode = ref<"table" | "cards">("table");
 const hasAnyVotes = computed(() => votedSlugs.value.size > 0);
 const isVoteDisabled = (slug: string) =>
   hasVotedFor(slug) ||
-    isLoading.value ||
-    votingSlug.value !== null ||
-    hasLoadError.value;
+  isLoading.value ||
+  votingSlug.value !== null ||
+  hasLoadError.value;
 const headers = [
   { title: "Coin", key: "coin" },
-  { title: "Thumbnail", key: "thumbnail" },
-  { title: "Header", key: "header" },
-  { title: "Open Graph", key: "openGraph" },
-  { title: "Price", key: "price" },
+  { title: "Votes", key: "votes", align: "center" as const },
   { title: "24h", key: "change" },
   { title: "Market cap", key: "marketCap" },
+  { title: "Liquidity", key: "liquidity" },
   { title: "Volume 24h", key: "volume" },
-  { title: "Votes", key: "votes", align: "end" as const },
+  { title: "Links", key: "links" },
 ];
 const tableItems = computed(() =>
   COIN.catCoins.coins.map((coin) => ({
@@ -588,14 +580,40 @@ const tableItems = computed(() =>
 );
 const filteredItems = computed(() => {
   const query = searchQuery.value.trim().toLocaleLowerCase();
-  if (!query) return tableItems.value;
+  const items = query
+    ? tableItems.value.filter((coin) =>
+        [coin.name, coin.ticker, coin.chain, coin.description].some((value) =>
+          value.toLocaleLowerCase().includes(query),
+        ),
+      )
+    : tableItems.value;
 
-  return tableItems.value.filter((coin) =>
-    [coin.name, coin.ticker, coin.chain, coin.description].some((value) =>
-      value.toLocaleLowerCase().includes(query),
-    ),
-  );
+  return [...items].sort((first, second) => {
+    const firstValue = getSortValue(first, sortBy.value);
+    const secondValue = getSortValue(second, sortBy.value);
+
+    if (firstValue === null) return secondValue === null ? 0 : 1;
+    if (secondValue === null) return -1;
+    return secondValue - firstValue;
+  });
 });
+
+function getSortValue(
+  item: (typeof tableItems.value)[number],
+  key: SortKey,
+) {
+  if (key === "votes") return getVoteCount(item.slug);
+  if (!item.market) return null;
+
+  const marketValues: Record<Exclude<SortKey, "votes">, number> = {
+    change: item.market.priceChange24h,
+    marketCap: item.market.marketCapUsd,
+    liquidity: item.market.liquidityUsd,
+    volume: item.market.volume24hUsd,
+  };
+
+  return marketValues[key];
+}
 
 onMounted(() => {
   void loadVotes();
@@ -637,9 +655,7 @@ async function loadMarkets() {
 async function vote(slug: string) {
   if (hasVotedFor(slug) || votingSlug.value || hasLoadError.value) return;
 
-  const isKnownCoin = COIN.catCoins.coins.some(
-    (coin) => coin.slug === slug,
-  );
+  const isKnownCoin = COIN.catCoins.coins.some((coin) => coin.slug === slug);
   if (!isKnownCoin) {
     throw new Error(`Unknown cat coin identifier: ${slug}`);
   }
@@ -692,9 +708,7 @@ function hasImageFailed(slug: string, type: string) {
 }
 
 function markImageAsFailed(slug: string, type: string) {
-  failedImages.value = new Set(failedImages.value).add(
-    getImageKey(slug, type),
-  );
+  failedImages.value = new Set(failedImages.value).add(getImageKey(slug, type));
 }
 
 function getImageUrl(

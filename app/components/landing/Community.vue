@@ -10,13 +10,47 @@
       style="background: var(--primary)"
     />
 
-    <div class="relative max-w-3xl mx-auto text-center">
+    <div class="relative mx-auto max-w-5xl text-center">
       <p
-        class="text-lg mb-14 max-w-xl mx-auto"
+        class="mx-auto mb-10 max-w-2xl text-lg leading-relaxed"
         style="color: var(--text-muted)"
       >
         {{ COIN.community.description }}
       </p>
+
+      <div class="mb-12 grid gap-4 text-left sm:grid-cols-2">
+        <article
+          v-for="rule in COIN.community.rules"
+          :key="rule.title"
+          class="flex gap-4 rounded-2xl border p-5"
+          style="
+            background-color: var(--bg-subtle);
+            border-color: color-mix(in srgb, var(--primary) 15%, transparent);
+          "
+        >
+          <span
+            class="flex size-11 shrink-0 items-center justify-center rounded-xl text-xl"
+            style="
+              background-color: color-mix(
+                in srgb,
+                var(--primary) 14%,
+                transparent
+              );
+            "
+            aria-hidden="true"
+          >
+            {{ rule.icon }}
+          </span>
+          <div>
+            <h3 class="mb-1 font-black" style="color: var(--text-primary)">
+              {{ rule.title }}
+            </h3>
+            <p class="text-sm leading-relaxed" style="color: var(--text-muted)">
+              {{ rule.description }}
+            </p>
+          </div>
+        </article>
+      </div>
 
       <div class="flex flex-wrap justify-center gap-5">
         <a

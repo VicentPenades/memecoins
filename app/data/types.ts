@@ -36,6 +36,12 @@ export type HowToBuyStep = {
   description: string;
 };
 
+export type CommunityRule = {
+  icon: string;
+  title: string;
+  description: string;
+};
+
 export type CoinConfig = {
   general: {
     name: string;
@@ -81,6 +87,7 @@ export type CoinConfig = {
   community: {
     title: string;
     description: string;
+    rules: CommunityRule[];
     socials: SocialLink[];
   };
 };

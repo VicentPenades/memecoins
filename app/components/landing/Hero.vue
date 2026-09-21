@@ -43,6 +43,106 @@
       </div>
     </div>
   </CommonSection>
+
+  <Teleport to="body">
+    <Transition name="pump-modal">
+      <div
+        v-if="isPumpModalOpen"
+        class="fixed inset-0 z-[100] flex items-center justify-center bg-black/75 p-4 backdrop-blur-sm"
+        role="presentation"
+        @click.self="closePumpModal"
+        @keydown.esc="closePumpModal"
+      >
+        <section
+          class="w-full max-w-md overflow-hidden rounded-3xl border p-6 text-center shadow-2xl sm:p-8"
+          style="
+            color: var(--text-primary);
+            background: var(--bg-gradient);
+            border-color: color-mix(
+              in srgb,
+              var(--primary) 35%,
+              transparent
+            );
+            box-shadow: 0 0 80px
+              color-mix(in srgb, var(--primary) 24%, transparent);
+          "
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="pump-modal-title"
+          aria-describedby="pump-modal-description"
+        >
+          <div
+            class="mx-auto mb-5 flex size-20 items-center justify-center rounded-3xl text-5xl"
+            style="
+              background-color: color-mix(
+                in srgb,
+                var(--primary) 16%,
+                transparent
+              );
+            "
+            aria-hidden="true"
+          >
+            🚀
+          </div>
+
+          <p
+            class="mb-2 text-xs font-black uppercase tracking-[0.25em]"
+            style="color: var(--primary)"
+          >
+            Moon mission complete
+          </p>
+          <h2
+            id="pump-modal-title"
+            class="mb-3 text-3xl font-black sm:text-4xl"
+          >
+            The chart has spoken.
+          </h2>
+          <p
+            id="pump-modal-description"
+            class="mx-auto mb-7 max-w-sm text-sm leading-relaxed sm:text-base"
+            style="color: var(--text-muted)"
+          >
+            You fed the cat. You summoned the green candles. Now join the new
+            era of Cat Season.
+          </p>
+
+          <div class="flex flex-col gap-3">
+            <a
+              :href="COIN.hero.ctaUrl"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="inline-flex items-center justify-center rounded-2xl px-6 py-4 text-base font-black transition-transform duration-200 hover:scale-[1.02]"
+              style="
+                color: var(--text-inverse);
+                background: linear-gradient(
+                  to right,
+                  var(--primary-light),
+                  var(--primary)
+                );
+                box-shadow: 0 0 30px
+                  color-mix(in srgb, var(--primary) 35%, transparent);
+              "
+              @click="closePumpModal"
+            >
+              Join the new era · Buy $CATSZN
+            </a>
+            <button
+              type="button"
+              class="rounded-2xl border px-6 py-3 text-sm font-bold transition-colors hover:border-[var(--text-muted)]"
+              style="
+                color: var(--text-muted);
+                border-color: var(--border-default);
+              "
+              autofocus
+              @click="closePumpModal"
+            >
+              No, I’m a dog 🐶
+            </button>
+          </div>
+        </section>
+      </div>
+    </Transition>
+  </Teleport>
 </template>
 
 <script setup lang="ts">
@@ -51,7 +151,12 @@ import type { Game } from "phaser";
 import { COIN } from "~/data/coin";
 
 const gameContainer = ref<HTMLDivElement | null>(null);
+const isPumpModalOpen = ref(false);
 let phaserGame: Game | null = null;
+
+const closePumpModal = () => {
+  isPumpModalOpen.value = false;
+};
 
 // --- EFECTOS DE SONIDO SINTETIZADOS (Web Audio API) ---
 // Se reutiliza un único AudioContext en lugar de crear uno nuevo por sonido.
@@ -561,6 +666,8 @@ onMounted(async () => {
         duration: 1500,
         ease: "Bounce.easeOut",
         onComplete: () => {
+          isPumpModalOpen.value = true;
+
           // `delayedCall` está ligado al ciclo de vida de la escena: no dispara
           // sobre objetos destruidos si el componente se desmonta antes.
           this.time.delayedCall(3000, () => {
@@ -627,3 +734,40 @@ onUnmounted(() => {
   if (audioCtx) audioCtx.close();
 });
 </script>
+
+<style scoped>
+.pump-modal-enter-active,
+.pump-modal-leave-active {
+  transition:
+    opacity 0.2s ease,
+    backdrop-filter 0.2s ease;
+}
+
+.pump-modal-enter-active section,
+.pump-modal-leave-active section {
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease;
+}
+
+.pump-modal-enter-from,
+.pump-modal-leave-to,
+.pump-modal-enter-from section,
+.pump-modal-leave-to section {
+  opacity: 0;
+}
+
+.pump-modal-enter-from section,
+.pump-modal-leave-to section {
+  transform: translateY(12px) scale(0.96);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pump-modal-enter-active,
+  .pump-modal-leave-active,
+  .pump-modal-enter-active section,
+  .pump-modal-leave-active section {
+    transition: none;
+  }
+}
+</style>
