@@ -1,9 +1,10 @@
-import { COIN } from "../../../app/data/coin";
 import { dexscreenerService } from "../../services/dexscreener/services/dexscreener.service";
 import { useDatabase } from "../../utils/database";
 
-type CachedMediaRow = {
+type CoinMarketRow = {
   slug: string;
+  chain_id: string | null;
+  contract_address: string | null;
   image_url: string | null;
   header_url: string | null;
   open_graph_url: string | null;
@@ -18,12 +19,18 @@ type CoinMedia = {
 export default defineCachedEventHandler(
   async (event) => {
     const sql = useDatabase(event);
-    const cachedMediaRows = await sql<CachedMediaRow[]>`
-      SELECT slug, image_url, header_url, open_graph_url
+    const coins = await sql<CoinMarketRow[]>`
+      SELECT
+        slug,
+        chain_id,
+        contract_address,
+        image_url,
+        header_url,
+        open_graph_url
       FROM cat_coins
     `;
     const cachedMedia = Object.fromEntries(
-      cachedMediaRows.map((row) => [
+      coins.map((row) => [
         row.slug,
         {
           imageUrl: row.image_url,
@@ -34,10 +41,14 @@ export default defineCachedEventHandler(
     );
 
     const results = await Promise.allSettled(
-      COIN.catCoins.coins.map(async (coin) => ({
+      coins.map(async (coin) => ({
         slug: coin.slug,
-        market: coin.dexScreener
-          ? await dexscreenerService.getTokenMarketData(coin.dexScreener)
+        market:
+          coin.chain_id && coin.contract_address
+          ? await dexscreenerService.getTokenMarketData({
+              chainId: coin.chain_id,
+              tokenAddress: coin.contract_address,
+            })
           : null,
       })),
     );
@@ -48,7 +59,7 @@ export default defineCachedEventHandler(
     const mediaUpdates: Promise<unknown>[] = [];
 
     results.forEach((result, index) => {
-      const coin = COIN.catCoins.coins[index];
+      const coin = coins[index];
       if (!coin) return;
       const storedMedia = cachedMedia[coin.slug] ?? {
         imageUrl: null,

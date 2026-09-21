@@ -17,19 +17,6 @@ export type TokenomicsItem = {
   value: string;
 };
 
-export type CatCoin = {
-  slug: string;
-  name: string;
-  ticker: string;
-  chain: string;
-  emoji: string;
-  description: string;
-  dexScreener?: {
-    chainId: string;
-    tokenAddress: string;
-  };
-};
-
 export type HowToBuyStep = {
   emoji: string;
   title: string;
@@ -76,7 +63,6 @@ export type CoinConfig = {
   catCoins: {
     title: string;
     description: string;
-    coins: CatCoin[];
   };
 
   howToBuy: {

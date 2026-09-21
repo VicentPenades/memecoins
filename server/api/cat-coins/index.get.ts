@@ -6,6 +6,9 @@ import {
 
 type CoinVoteRow = {
   slug: string;
+  name: string;
+  ticker: string;
+  chain: string;
   vote_count: number;
 };
 
@@ -14,7 +17,7 @@ export default defineEventHandler(async (event) => {
   const visitorId = getExistingVisitorId(event);
 
   const coins = await sql<CoinVoteRow[]>`
-    SELECT slug, vote_count
+    SELECT slug, name, ticker, chain, vote_count
     FROM cat_coins
     ORDER BY vote_count DESC, slug ASC
   `;
@@ -32,6 +35,12 @@ export default defineEventHandler(async (event) => {
   }
 
   return {
+    coins: coins.map(({ slug, name, ticker, chain }) => ({
+      slug,
+      name,
+      ticker,
+      chain,
+    })),
     votes: Object.fromEntries(
       coins.map((coin) => [coin.slug, coin.vote_count]),
     ),

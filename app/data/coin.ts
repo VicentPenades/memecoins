@@ -1,5 +1,4 @@
 import type { CoinConfig } from "./types";
-import { CAT_COINS } from "./cat-coins";
 
 // General information about the coin
 const COIN_GENERAL: CoinConfig["general"] = {
@@ -50,7 +49,6 @@ const COIN_CAT_COINS: CoinConfig["catCoins"] = {
   title: "The Cat Coin Hall of Fame 🐈",
   description:
     "Cats already rule the internet. These feline coins prove they are coming for the blockchain too.",
-  coins: CAT_COINS,
 };
 
 // How to buy section information for the coin

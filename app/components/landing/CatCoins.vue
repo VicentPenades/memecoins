@@ -180,7 +180,7 @@
                   @error="markImageAsFailed(item.slug, 'thumbnail')"
                 />
               </a>
-              <LandingImageFallback v-else :emoji="item.emoji" />
+              <LandingImageFallback v-else :emoji="CAT_FALLBACK_EMOJI" />
 
               <div>
                 <p class="font-black" style="color: var(--text-primary)">
@@ -354,7 +354,7 @@
                 referrerpolicy="no-referrer"
                 @error="markImageAsFailed(item.slug, 'cardThumbnail')"
               />
-              <span v-else aria-hidden="true">{{ item.emoji }}</span>
+              <span v-else aria-hidden="true">{{ CAT_FALLBACK_EMOJI }}</span>
             </span>
 
             <h3 class="text-lg font-black" style="color: var(--text-primary)">
@@ -516,9 +516,20 @@
 <script setup lang="ts">
 import { COIN } from "~/data/coin";
 
-type VoteResponse = {
+type VoteStateResponse = {
   votes: Record<string, number>;
   votedSlugs: string[];
+};
+
+type CatalogCoin = {
+  slug: string;
+  name: string;
+  ticker: string;
+  chain: string;
+};
+
+type CatalogResponse = VoteStateResponse & {
+  coins: CatalogCoin[];
 };
 
 type MarketData = {
@@ -543,6 +554,8 @@ type CoinMedia = Pick<MarketData, "imageUrl" | "headerUrl" | "openGraphUrl">;
 
 type SortKey = "votes" | "change" | "marketCap" | "liquidity" | "volume";
 
+const CAT_FALLBACK_EMOJI = "🐱";
+const coins = ref<CatalogCoin[]>([]);
 const voteCounts = ref<Record<string, number>>({});
 const markets = ref<Record<string, MarketData | null>>({});
 const media = ref<Record<string, CoinMedia>>({});
@@ -572,7 +585,7 @@ const headers = [
   { title: "Links", key: "links" },
 ];
 const tableItems = computed(() =>
-  COIN.catCoins.coins.map((coin) => ({
+  coins.value.map((coin) => ({
     ...coin,
     market: markets.value[coin.slug] ?? null,
     media: media.value[coin.slug] ?? null,
@@ -582,7 +595,7 @@ const filteredItems = computed(() => {
   const query = searchQuery.value.trim().toLocaleLowerCase();
   const items = query
     ? tableItems.value.filter((coin) =>
-        [coin.name, coin.ticker, coin.chain, coin.description].some((value) =>
+        [coin.name, coin.ticker, coin.chain].some((value) =>
           value.toLocaleLowerCase().includes(query),
         ),
       )
@@ -626,7 +639,8 @@ async function loadVotes() {
   errorMessage.value = "";
 
   try {
-    const response = await $fetch<VoteResponse>("/api/cat-coins");
+    const response = await $fetch<CatalogResponse>("/api/cat-coins");
+    coins.value = response.coins;
     voteCounts.value = response.votes;
     votedSlugs.value = new Set(response.votedSlugs);
   } catch (error) {
@@ -655,7 +669,7 @@ async function loadMarkets() {
 async function vote(slug: string) {
   if (hasVotedFor(slug) || votingSlug.value || hasLoadError.value) return;
 
-  const isKnownCoin = COIN.catCoins.coins.some((coin) => coin.slug === slug);
+  const isKnownCoin = coins.value.some((coin) => coin.slug === slug);
   if (!isKnownCoin) {
     throw new Error(`Unknown cat coin identifier: ${slug}`);
   }
@@ -664,7 +678,7 @@ async function vote(slug: string) {
   errorMessage.value = "";
 
   try {
-    const response = await $fetch<VoteResponse>("/api/cat-coins/vote", {
+    const response = await $fetch<VoteStateResponse>("/api/cat-coins/vote", {
       method: "POST",
       body: { slug },
     });
