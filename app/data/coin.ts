@@ -17,10 +17,11 @@ const COIN_HERO: CoinConfig["hero"] = {
   headline: "It's always Cat Season",
   subheadline: [
     "Join the fluffiest community in crypto. No dogs allowed. $CATSZN is here to take over the blockchain, one purr at a time.",
-    "Sometimes BTC pumps, sometimes alts pumps, but we love cats. It's always $CATSZN.",
+    "Sometimes BTC pumps, sometimes ALTS pumps, but it's always $CATSZN.",
   ],
   ctaLabel: "Buy $CATSZN Now 🚀",
-  ctaUrl: "https://raydium.io/swap/?inputMint=sol&outputMint=CATSZN_ADDRESS",
+  ctaUrl:
+    "https://pump.fun/coin/Hd8xhFxcrh5SdmaAFFzePqkDkonkwKxDfg4aU1Appump",
 };
 
 // About
@@ -40,7 +41,7 @@ const COIN_TOKENOMICS: CoinConfig["tokenomics"] = {
     { label: "Tax", value: "0%" },
     { label: "Contract", value: "Renounced ✅" },
   ],
-  contractAddress: "CATSZNxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+  contractAddress: "Hd8xhFxcrh5SdmaAFFzePqkDkonkwKxDfg4aU1Appump",
   chain: "Solana",
 };
 

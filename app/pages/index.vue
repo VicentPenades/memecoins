@@ -2,7 +2,7 @@
 import { COIN } from "~/data/coin";
 
 useHead({
-  title: `${COIN.general.name} (${COIN.general.ticker})`,
+  title: `${COIN.general.ticker}`,
   meta: [
     { name: "description", content: COIN.general.description },
     {

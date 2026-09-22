@@ -58,11 +58,7 @@
           style="
             color: var(--text-primary);
             background: var(--bg-gradient);
-            border-color: color-mix(
-              in srgb,
-              var(--primary) 35%,
-              transparent
-            );
+            border-color: color-mix(in srgb, var(--primary) 35%, transparent);
             box-shadow: 0 0 80px
               color-mix(in srgb, var(--primary) 24%, transparent);
           "
@@ -103,7 +99,7 @@
             style="color: var(--text-muted)"
           >
             You fed the cat. You summoned the green candles. Now join the new
-            era of Cat Season.
+            era of CATSZN.
           </p>
 
           <div class="flex flex-col gap-3">
@@ -340,9 +336,7 @@ onMounted(async () => {
       this.moon = this.add
         .container(this.moonX(width), this.moonY(height), [
           this.add.circle(0, 0, 48, 0xfef3c7, 0.12),
-          this.add
-            .circle(0, 0, 36, 0xfef3c7)
-            .setStrokeStyle(3, 0xfde68a, 0.8),
+          this.add.circle(0, 0, 36, 0xfef3c7).setStrokeStyle(3, 0xfde68a, 0.8),
           this.add.circle(-12, -8, 7, 0xd6d3d1, 0.35),
           this.add.circle(13, 10, 5, 0xd6d3d1, 0.3),
           this.add.circle(10, -15, 4, 0xd6d3d1, 0.25),
